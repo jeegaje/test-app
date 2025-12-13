@@ -62,4 +62,38 @@ jobs:
           app-name: 'angga-test1-frontend-as'
           slot-name: 'Production'
           package: .
-          
+
+  slack-notification:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    if: always()
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: general # Set desired Slack channel
+          SLACK_COLOR: ${{ needs.deploy.result }}
+          SLACK_ICON: https://github.com/azure.png?size=48
+          SLACK_MESSAGE_ON_SUCCESS: |
+            🚀 *Deployment Successful!*
+            
+            *Application:* angga-test1-frontend-as
+            *Image Tag:* ${{ github.sha }}
+            *Environment:* Development
+            
+            ✅ *Status:* Web Apps updated successfully!=
+
+            _Code is live and running in Azure Web Apps!_
+          SLACK_MESSAGE_ON_FAILURE: |
+            ⚠️ *Deployment Failed!*
+            
+            *Application:* angga-test1-frontend-as
+            *Environment:* Development
+            
+            ❌ *Status:* Deployment encountered an error
+            *Commit SHA:* ${{ github.sha }}
+            
+            _Please check GitHub Actions logs for details_
+          SLACK_TITLE: 'Azure Deployment Status'
+          SLACK_USERNAME: DevOps Bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}          
